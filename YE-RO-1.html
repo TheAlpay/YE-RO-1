@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YERO — Web Sitesi Geliştirme Raporu</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f4f0; color: #1a1a1a; font-size: 14px; line-height: 1.6; }
+
+  .cover {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 56px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .cover-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888aaa; margin-bottom: 16px; }
+  .cover h1 { font-size: 36px; font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+  .cover h1 span { color: #e05252; }
+  .cover-sub { font-size: 15px; color: #9090b0; margin-bottom: 32px; }
+  .cover-meta {
+    display: flex; gap: 32px; font-size: 12px; color: #6a6a8a;
+    border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px;
+  }
+  .cover-meta strong { color: #bbbbd0; display: block; font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+
+  .toc { background: #fff; padding: 28px 48px; border-bottom: 1px solid #e8e6e0; }
+  .toc-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #999; margin-bottom: 14px; }
+  .toc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .toc-item {
+    padding: 10px 14px; border-radius: 8px; border: 1px solid #e8e6e0;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  }
+  .toc-item:hover { border-color: #e05252; background: #fff8f8; }
+  .toc-item .num { font-size: 10px; color: #aaa; font-weight: 600; margin-bottom: 3px; }
+  .toc-item .lbl { font-size: 12px; font-weight: 600; color: #333; }
+
+  .content { max-width: 860px; margin: 0 auto; padding: 0 48px 64px; }
+
+  .section { margin-top: 48px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px; padding-bottom: 14px;
+    border-bottom: 2px solid #1a1a2e;
+  }
+  .section-num {
+    background: #1a1a2e; color: #fff; font-size: 11px; font-weight: 700;
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 19px; font-weight: 700; color: #1a1a2e; }
+  .section-header .badge {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .badge-red { background: #fff0f0; color: #c0392b; border: 1px solid #f5c0bb; }
+  .badge-amber { background: #fffbf0; color: #b7770d; border: 1px solid #f5dfa0; }
+  .badge-blue { background: #f0f4ff; color: #3555b7; border: 1px solid #c0ccf0; }
+  .badge-green { background: #f0fbf4; color: #1a7a40; border: 1px solid #a0d8b4; }
+
+  /* INTRO BOX */
+  .intro-box {
+    background: #fff; border: 1px solid #e4e2dc;
+    border-left: 4px solid #e05252;
+    border-radius: 0 10px 10px 0;
+    padding: 20px 22px; font-size: 14px; color: #333; line-height: 1.8;
+    margin-bottom: 8px;
+  }
+
+  /* FINDING CARDS — tıklanabilir */
+  .finding { border-radius: 10px; border: 1px solid #e4e2dc; overflow: hidden; margin-bottom: 12px; background: #fff; }
+  .finding-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px; cursor: pointer; user-select: none;
+    transition: background 0.12s;
+  }
+  .finding-header:hover { background: #fafaf8; }
+  .finding-arrow { margin-left: auto; font-size: 12px; color: #bbb; transition: transform 0.2s; }
+  .finding-header.open .finding-arrow { transform: rotate(180deg); }
+  .sev {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 3px 9px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+  }
+  .sev-kritik { background: #c0392b; color: #fff; }
+  .sev-sorun  { background: #e67e22; color: #fff; }
+  .sev-oneri  { background: #3555b7; color: #fff; }
+  .finding-title { font-weight: 600; font-size: 14px; color: #1a1a1a; flex: 1; }
+  .finding-body { border-top: 1px solid #f0ede6; padding: 18px 18px 16px; display: none; }
+  .finding-body.open { display: block; }
+  .finding-body p { color: #444; margin-bottom: 10px; font-size: 13.5px; line-height: 1.75; }
+  .fix-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: #1a7a40; margin-top: 14px; margin-bottom: 6px;
+  }
+  .fix-steps { list-style: none; }
+  .fix-steps li {
+    display: flex; gap: 8px; padding: 6px 0;
+    font-size: 13px; color: #333; border-bottom: 1px solid #f5f3ef;
+  }
+  .fix-steps li:last-child { border-bottom: none; }
+  .fix-steps li::before { content: '→'; color: #1a7a40; font-weight: 700; flex-shrink: 0; }
+
+  /* TOOLS */
+  .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tool-card {
+    background: #fff; border: 1px solid #e4e2dc; border-radius: 10px; padding: 18px 20px;
+    transition: border-color 0.15s;
+  }
+  .tool-card:hover { border-color: #1a1a2e; }
+  .tool-name { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+  .tool-type {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #aaa; margin-bottom: 8px;
+  }
+  .tool-card p { font-size: 13px; color: #555; line-height: 1.65; }
+  .tool-free {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    background: #f0fbf4; color: #1a7a40; border: 1px solid #a0d8b4;
+    padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle;
+  }
+
+  /* ACTION */
+  .action-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .action-col { background: #fff; border: 1px solid #e4e2dc; border-radius: 10px; overflow: hidden; }
+  .action-col-header {
+    padding: 12px 16px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid #e4e2dc;
+  }
+  .ac-red   { background: #fdf2f0; color: #c0392b; }
+  .ac-amber { background: #fdf8f0; color: #b05d00; }
+  .ac-blue  { background: #f0f4ff; color: #2c4fa0; }
+  .action-list { list-style: none; padding: 12px 0; }
+  .action-list li {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 7px 16px; font-size: 12.5px; color: #333;
+    border-bottom: 1px solid #f5f3ef; line-height: 1.5;
+  }
+  .action-list li:last-child { border-bottom: none; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .dot-red   { background: #e74c3c; }
+  .dot-amber { background: #e67e22; }
+  .dot-blue  { background: #3555b7; }
+
+  .divider { height: 1px; background: #e8e6e0; margin: 40px 0; }
+
+  @media (max-width: 700px) {
+    .cover { padding: 32px 24px; }
+    .toc { padding: 20px 24px; }
+    .toc-grid { grid-template-columns: repeat(2, 1fr); }
+    .content { padding: 0 24px 48px; }
+    .action-cols { grid-template-columns: 1fr; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .cover h1 { font-size: 26px; }
+    .cover-meta { flex-wrap: wrap; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-label">Dahili Rapor — Mart 2026</div>
+  <h1>YERO <span>Web Sitesi</span><br>Geliştirme Raporu</h1>
+  <div class="cover-sub">ye-ro.com · Kullanıcı Deneyimi · İçerik · SEO · Ölçüm</div>
+  <div class="cover-meta">
+    <div><strong>+27</strong>Yıllık Tecrübe</div>
+    <div><strong>39.974</strong>Toplam Öğrenci</div>
+    <div><strong>%98</strong>Vize Onayı</div>
+    <div><strong>82K</strong>Instagram Takipçi</div>
+  </div>
+</div>
+
+<div class="toc">
+  <div class="toc-title">İçindekiler</div>
+  <div class="toc-grid">
+    <div class="toc-item" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">
+      <div class="num">01</div><div class="lbl">Temel Sorun</div>
+    </div>
+    <div class="toc-item" onclick="document.getElementById('s2').scrollIntoView({behavior:'smooth'})">
+      <div class="num">02–05</div><div class="lbl">Sorunlar</div>
+    </div>
+    <div class="toc-item" onclick="document.getElementById('s6').scrollIntoView({behavior:'smooth'})">
+      <div class="num">06</div><div class="lbl">Ölçüm Araçları</div>
+    </div>
+    <div class="toc-item" onclick="document.getElementById('s7').scrollIntoView({behavior:'smooth'})">
+      <div class="num">07</div><div class="lbl">Aksiyon Planı</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- GİRİŞ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">00</div>
+      <h2>Genel Durum</h2>
+    </div>
+    <div class="intro-box">
+      YERO'nun sitesi arama motorlarında görünüyor, trafik geliyor. Ama gelen kullanıcı sayfada karar veremiyor ve ayrılıyor. Sorun içerik eksikliği değil — içeriğin yanlış yerde, yanlış formatta sunulması. Kullanıcının aklındaki üç soru var: "Bu program bana uygun mu?", "Ne kadar tutacak?", "Gidenler ne yaşadı?" Bu üç sorunun cevabı ya sayfanın çok derininde ya da hiç yok. Bu rapor bunları düzeltmeye odaklanıyor.
+    </div>
+  </div>
+
+  <!-- SORUNLAR -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>Kullanıcıyı Sayfada Tutan Hiçbir Unsur Yok</h2>
+      <span class="badge badge-red">KRİTİK</span>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header" onclick="toggle(this,'fb1')">
+        <span class="sev sev-kritik">KRİTİK</span>
+        <span class="finding-title">Site bir araştırma durağı değil, geçiş noktası</span>
+        <span class="finding-arrow">▼</span>
+      </div>
+      <div class="finding-body" id="fb1">
+        <p>Sitede tek bir interaktif element yok. Test yok, simülasyon yok, hesap makinesi yok. Kullanıcı sayfaya giriyor, uzun metinleri görüyor ve çıkıyor. 39.974 öğrenci, 27 yıl, %98 vize oranı — bunlar çok güçlü rakamlar. Ama kullanıcı bu rakamların altını dolduran hiçbir şey görmüyor ve ikna olmadan ayrılıyor.</p>
+        <div class="fix-label">Yapılacaklar</div>
+        <ul class="fix-steps">
+          <li>"Hangi program sana uygun?" şeklinde 4–5 soruluk yönlendirici eklenebilir</li>
+          <li>Work & Travel için "Bütçe hesaplayıcısı" — kaç ay çalışırsam masrafımı çıkarırım — gibi basit bir widget eklenebilir</li>
+          <li>Bu tür interaktif elementler kullanıcıyı dakikalarca sayfada tutar ve dönüşüme doğrudan katkı sağlar</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Sosyal Kanıt Var Ama Yanlış Yerde</h2>
+      <span class="badge badge-amber">ÖNEMLİ</span>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header" onclick="toggle(this,'fb2')">
+        <span class="sev sev-sorun">SORUN</span>
+        <span class="finding-title">Gerçek hikayeler program sayfalarına taşınmamış</span>
+        <span class="finding-arrow">▼</span>
+      </div>
+      <div class="finding-body" id="fb2">
+        <p>YERO TV'de öğrenci hikayeleri var, Instagram'da 82.000 takipçi var. Ama program sayfalarına bakıldığında bunların hiçbirini göremiyorsunuz. Fotoğraflar var ama bunlar ajans görseli kalitesinde. "Amerika'da hangi şehirde çalıştı, ne kadar kazandı, geri döndüğünde ne değişti?" sorusunun cevabı yok.</p>
+        <div class="fix-label">Yapılacaklar</div>
+        <ul class="fix-steps">
+          <li>Her program sayfasının altına o programdan gitmiş 3–4 kişinin kısa deneyim yazısı ve gerçek fotoğrafı eklenebilir</li>
+          <li>"X şehrine gitti, saatlik 14 USD kazandı, 3 ayda masrafını çıkardı" gibi somut bir cümle sayfalarca açıklama metninden çok daha ikna edici</li>
+          <li>YERO TV videolarını ilgili program sayfalarına taşımak, hem dwell time'ı artırır hem SEO sinyali gönderir</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Yaşam Maliyeti ve Sosyal Hayat Bilgisi Yok</h2>
+      <span class="badge badge-amber">ÖNEMLİ</span>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header" onclick="toggle(this,'fb3')">
+        <span class="sev sev-sorun">SORUN</span>
+        <span class="finding-title">Kullanıcı cevabı başka yerde arıyor</span>
+        <span class="finding-arrow">▼</span>
+      </div>
+      <div class="finding-body" id="fb3">
+        <p>Kullanıcının kafasındaki en büyük soru: "Gidersem orada nasıl yaşayacağım?" Kira ne kadar, market ne kadar, şehirde gezmek ne kadar? Bu bilgiler sitede yok. Kullanıcı bu soruyu yanıtsız bırakarak çıkıyor ve cevabı başka yerde arıyor — büyük ihtimalle rakip bir sitede ya da sosyal medyada.</p>
+        <div class="fix-label">Yapılacaklar</div>
+        <ul class="fix-steps">
+          <li>Her ülke sayfasına "Ortalama Aylık Yaşam Maliyeti" bölümü eklenebilir</li>
+          <li>"New York'ta Work & Travel yapıyorsanız aylık yaklaşık X USD harcamanız gerekiyor" gibi rehber içerikler hem kullanıcıyı tutar hem yeni trafik çeker</li>
+          <li>Bu içerikler aynı zamanda "New York yaşam maliyeti Work Travel" gibi aramalarda Google'da görünürlük sağlar</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">04–05</div>
+      <h2>Tasarım & SEO</h2>
+      <span class="badge badge-amber">ÖNEMLİ</span>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header" onclick="toggle(this,'fb4')">
+        <span class="sev sev-sorun">SORUN</span>
+        <span class="finding-title">Sayfa açıldığında gözün nereye gideceği belli değil</span>
+        <span class="finding-arrow">▼</span>
+      </div>
+      <div class="finding-body" id="fb4">
+        <p>Slider var, banner var, metin var, buton var — ama görsel hiyerarşi yok. "İletişime Geçin" butonu her yerde ama kullanıcı henüz ikna olmadan form doldurmaz. Kullanıcıyı önce bilgilendirip sonra aksiyona yönlendiren bir akış kurulmamış.</p>
+        <div class="fix-label">Yapılacaklar</div>
+        <ul class="fix-steps">
+          <li>Ana sayfada tek bir net yönlendirme belirlenmeli</li>
+          <li>Tüm butonların aynı metni kullanması yerine her buton o andaki kullanıcı niyetine göre farklılaşmalı: "Programı İncele", "Fiyat Öğren", "Danışmanla Konuş"</li>
+          <li>Ekibimiz sayfasına danışman e-posta adresleri eklenebilir — küçük bir değişiklik ama güveni doğrudan artırır</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header" onclick="toggle(this,'fb5')">
+        <span class="sev sev-sorun">SORUN</span>
+        <span class="finding-title">SEO trafik getiriyor ama kullanıcı kalmıyor</span>
+        <span class="finding-arrow">▼</span>
+      </div>
+      <div class="finding-body" id="fb5">
+        <p>Sitede çok fazla metin var ve bu metinler arama motorlarında sıralama sağlıyor. Ama büyük kısmı kullanıcı için değil, Google için yazılmış gibi duruyor. Aynı kelimeler sayfalarca tekrarlanıyor, asıl soruların cevabı ise bulunamıyor. Camp USA sayfasında fiyat bilgisi yok — bu sayfaya "Camp USA fiyat" diye gelen kullanıcı cevap bulamıyor ve çıkıyor.</p>
+        <div class="fix-label">Yapılacaklar</div>
+        <ul class="fix-steps">
+          <li>Camp USA sayfasına fiyat bilgisi eklenmeli</li>
+          <li>İçerikler "kullanıcının sorusunu yanıtlıyor mu?" sorusuyla gözden geçirilmeli</li>
+          <li>Tekrar eden metinler kısaltılıp yerlerine görseller, tablolar veya interaktif elementler eklenmeli</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ARAÇLAR -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Kullanıcı Davranışını Ölçün</h2>
+      <span class="badge badge-blue">ARAÇLAR</span>
+    </div>
+
+    <div class="finding" style="margin-bottom:20px;">
+      <div class="finding-header" style="cursor:default;">
+        <span class="finding-title" style="font-weight:400; color:#444;">Sitede Google Analytics ve Facebook Pixel zaten kurulu. Bu iyi bir başlangıç ama eksik. Kullanıcının sayfada nerede duraksadığını, nerede sıkıştığını ve nerede çıktığını görmek için ek araçlara ihtiyaç var. Aşağıdakilerin tamamı ücretsiz ya da çok düşük maliyetli.</span>
+      </div>
+    </div>
+
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name">Microsoft Clarity <span class="tool-free">Ücretsiz</span></div>
+        <div class="tool-type">Isı Haritası · Oturum Kaydı</div>
+        <p>Kullanıcıların sayfada neye tıkladığını, nereyi kaydırdığını ve nerede takıldığını gerçek oturum kayıtlarıyla gösterir. Kurulumu 10 dakika, verisi çok güçlü. Tamamen ücretsiz.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Hotjar <span class="tool-free">Freemium</span></div>
+        <div class="tool-type">Isı Haritası · Form Analizi</div>
+        <p>Clarity'ye benzer ama form analizinde daha güçlü. Hangi form alanında kullanıcıların takıldığını, doldurma oranlarını ve çıkış noktalarını gösterir. Ücretsiz paketi başlangıç için yeterli.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Google Search Console <span class="tool-free">Ücretsiz</span></div>
+        <div class="tool-type">SEO · Arama Performansı</div>
+        <p>Hangi arama sorgularının siteye trafik getirdiğini, hangi sayfaların Google'da nerede göründüğünü ve teknik sorunları gösterir. Kurulu değilse hemen kurulmalı.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Yandex Metrica <span class="tool-free">Ücretsiz</span></div>
+        <div class="tool-type">Isı Haritası · Form Analizi</div>
+        <p>Hotjar ve Clarity'ye alternatif, tamamen ücretsiz. Türkiye'deki kullanıcılar için güvenilir veri üretiyor. Form doldurma analizi de sunuyor.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Clarity + GA4 Entegrasyonu <span class="tool-free">Ücretsiz</span></div>
+        <div class="tool-type">Kombine Analiz</div>
+        <p>Microsoft Clarity, Google Analytics 4 ile entegre çalışıyor. Hangi kullanıcı segmentinin sayfada daha uzun kaldığını, hangisinin hemen çıktığını Clarity oturum kayıtlarıyla eşleştirip görebilirsiniz.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Ahrefs Webmaster Tools <span class="tool-free">Ücretsiz</span></div>
+        <div class="tool-type">SEO · Backlink Takibi</div>
+        <p>Sitenin SEO sağlığını, kırık linkleri ve dışarıdan gelen backlinkleri takip eder. Ücretsiz versiyonu küçük siteler için yeterli düzeyde veri sunuyor.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- AKSİYON -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <h2>Ne Zaman Ne Yapılmalı</h2>
+      <span class="badge badge-green">PLAN</span>
+    </div>
+
+    <div class="action-cols">
+      <div class="action-col">
+        <div class="action-col-header ac-red">Bu Ay</div>
+        <ul class="action-list">
+          <li><div class="dot dot-red"></div>Camp USA sayfasına fiyat bilgisi ekle</li>
+          <li><div class="dot dot-red"></div>Microsoft Clarity'yi siteye kur</li>
+          <li><div class="dot dot-red"></div>Google Search Console'u bağla</li>
+          <li><div class="dot dot-red"></div>Ekibimiz sayfasına danışman e-postaları ekle</li>
+          <li><div class="dot dot-red"></div>Program sayfalarına gerçek öğrenci fotoğrafı ve kısa yorum ekle</li>
+        </ul>
+      </div>
+      <div class="action-col">
+        <div class="action-col-header ac-amber">1–3 Ay</div>
+        <ul class="action-list">
+          <li><div class="dot dot-amber"></div>Clarity verileriyle kullanıcının nerede çıktığını tespit et</li>
+          <li><div class="dot dot-amber"></div>Her ülke sayfasına yaşam maliyeti bölümü ekle</li>
+          <li><div class="dot dot-amber"></div>Ana sayfa CTA hiyerarşisini sadeleştir</li>
+          <li><div class="dot dot-amber"></div>YERO TV videolarını program sayfalarına taşı</li>
+          <li><div class="dot dot-amber"></div>Program seçici veya bütçe hesaplayıcısı geliştir</li>
+        </ul>
+      </div>
+      <div class="action-col">
+        <div class="action-col-header ac-blue">3–6 Ay</div>
+        <ul class="action-list">
+          <li><div class="dot dot-blue"></div>Alumni hikaye sayfası oluştur</li>
+          <li><div class="dot dot-blue"></div>Şehir bazlı yaşam rehberleri yayınla</li>
+          <li><div class="dot dot-blue"></div>A/B testi başlat (CTA metinleri)</li>
+          <li><div class="dot dot-blue"></div>Blog içerik takvimine başla (ayda 4 yazı)</li>
+          <li><div class="dot dot-blue"></div>Mobil deneyimi Clarity verileriyle optimize et</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#1a1a2e;color:#555;text-align:center;padding:24px;font-size:12px;margin-top:40px;">
+  YERO Web Sitesi Geliştirme Raporu · Mart 2026 · Dahili Kullanım
+</div>
+
+<script>
+function toggle(header, bodyId) {
+  const body = document.getElementById(bodyId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+}
+</script>
+</body>
+</html>

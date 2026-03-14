@@ -1,0 +1,23 @@
+# Windows
+desktop.ini
+Thumbs.db
+
+# Office temp files
+~$*
+
+# Logs
+*.log
+
+# Images / unrelated files (OneDrive Desktop clutter)
+*.bat
+*.txt
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# Keep only project files
+!YE-RO-1.html
+!index.html
+!vercel.json
+!.gitignore
